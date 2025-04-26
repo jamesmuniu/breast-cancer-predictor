@@ -79,7 +79,6 @@ from PIL import Image
 # Load and display the image with a specified width
 image = Image.open('Capture.JPG')
 st.image(image, caption='Breast Cancer Awareness', width=150)
-image = Image.open('microscope')
-st.image(image, caption='RnD Continues', width=300)
+
 
 
