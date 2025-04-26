@@ -81,4 +81,4 @@ image = Image.open('Capture.JPG')
 st.image(image, caption='Breast Cancer Awareness', width=150)
 
 image = Image.open('microscope.jpg')
-st.image(image, caption='', width=150)
+st.image(image, caption='Research', width=150)
