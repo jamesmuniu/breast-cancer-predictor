@@ -59,11 +59,11 @@ if uploaded_file is not None:
         st.write(data[['Prediction Label', 'Prediction Probability']])
 
         # Visualization: Count plot of predictions
-        st.subheader("📊 Prediction Distribution")
-        fig, ax = plt.subplots(figsize=(10, 10))  # Set width to 4 inches and height to 3 inches
-        sns.countplot(x='Prediction Label', data=data, palette='Set2', ax=ax)
-        ax.set_title("Count of Predicted Labels")
-        st.pyplot(fig)
+        #st.subheader("📊 Prediction Distribution")
+        #fig, ax = plt.subplots(figsize=(10, 10))  # Set width to 4 inches and height to 3 inches
+        #sns.countplot(x='Prediction Label', data=data, palette='Set2', ax=ax)
+        #ax.set_title("Count of Predicted Labels")
+        #st.pyplot(fig)
 
         # Option to download
         csv = data.to_csv(index=False).encode('utf-8')
