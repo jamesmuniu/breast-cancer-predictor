@@ -85,9 +85,9 @@ if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
         
         # Validate data
-        if "diagnosis" not in data.columns:
-            st.error("The uploaded dataset must contain a 'diagnosis' column or match the expected format.")
-            st.stop()
+        #if "diagnosis" not in data.columns:
+            #st.error("The uploaded dataset must contain a 'diagnosis' column or match the expected format.")
+            #st.stop()
         if not all(data.dtypes.apply(lambda x: pd.api.types.is_numeric_dtype(x))):
             st.error("The dataset must contain only numeric columns for prediction.")
             st.stop()
