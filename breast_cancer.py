@@ -148,5 +148,3 @@ else:
 try:
     image = Image.open('Capture.JPG')
     st.image(image, caption='Breast Cancer Awareness', use_column_width=True)
-except FileNotFoundError:
-    st.warning("Image not found. Please ensure 'Capture.JPG' is in the correct directory.")
