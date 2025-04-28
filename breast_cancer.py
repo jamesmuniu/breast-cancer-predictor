@@ -12,7 +12,7 @@ image = Image.open('Capture.JPG')
 st.image(image, width=80)
 # Title and description
 #st.title("🩺 Breast Cancer Prediction App")
-st.markdown("<h5 style='font-size: 20px;'>🩺 Breast Cancer Prediction App </h5>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>🩺 Breast Cancer Prediction App </h3>", unsafe_allow_html=True)
 
 
 st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
