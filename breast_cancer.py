@@ -21,7 +21,7 @@ st.markdown("""Download the dataset from the [UCI Machine Learning Repository(ht
 """)
 ("""
 The dataset contains 📝:
-569 cases : Each representing a unique patient record.
+569 cases : Each representing a unique patient record🗃️.
 30 FNA-derived features : These features describe characteristics of the tumor, such as radius, texture, perimeter, area, smoothness, and more.
 Prepare Your Data for Prediction
 If you're testing the accuracy of the model:
@@ -30,13 +30,13 @@ Save the modified dataset as a CSV file .
 Upload Your CSV File
 Use the upload feature on the left👈of the page to submit your prepared CSV file.
 Ensure the file contains only the 30 feature columns without the target column. """)
-st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions.</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions.⚙️</h3>", unsafe_allow_html=True)
 (""" Once uploaded, the pre-trained machine learning model will process your data and generate predictions.
 The model will classify each tumor as either benign or malignant.""")
-st.markdown("<h3 style='font-size: 20px;'>🔗Download Predictions.</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>🔗Download Predictions⏬.</h3>", unsafe_allow_html=True)
 (""" After the predictions are complete, download the updated CSV file.
 The downloaded file will include an additional column: Predictions , which contains the model's classification for each case.""")
-st.markdown("<h3 style='font-size: 20px;'>🔗Compare Results.</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>🔗Compare Results☯️.</h3>", unsafe_allow_html=True)
 ("""If you removed the target column earlier, you can now compare the Predictions column with the original diagnosis column to evaluate the model's accuracy.
 """)
 
