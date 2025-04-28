@@ -11,8 +11,6 @@ st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide"
 st.title("🩺 Breast Cancer Prediction App")
 st.markdown("""
 Breast Cancer Prediction Challenge
-
-
 Step-by-Step Guide
 Download the Dataset
 Start by downloading the dataset from the UCI Machine Learning Repository . The dataset contains:
