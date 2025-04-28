@@ -30,7 +30,7 @@ Save the modified dataset as a CSV file .
  Upload Your CSV File
 Use the upload feature on the left👈of the page to submit your prepared CSV file.
 Ensure the file contains only the 30 feature columns without the target column. """)
-st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions.⚙️</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions.</h3>⚙", unsafe_allow_html=True)
 (""" Once uploaded, the pre-trained machine learning model will process your data and generate predictions.
 The model will classify each tumor as either benign or malignant.""")
 st.markdown("<h3 style='font-size: 20px;'>🔗Download Predictions⏬.</h3>", unsafe_allow_html=True)
