@@ -15,7 +15,7 @@ st.image(image, width=80)
 st.markdown("<h3 style='font-size: 20px;'>🩺 Breast Cancer Prediction App </h3>", unsafe_allow_html=True)
 
 
-st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
+st.markdown("<h3> style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
 (""" Download the Dataset""")
 st.markdown(""" Download the dataset from the [UCI Machine Learning Repository(https://archive.ics.uci.edu/dataset/17)
 """)
