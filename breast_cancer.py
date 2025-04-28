@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Set page configuration
-st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide")
+#st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide")
 
 # Title and description
 st.title("🩺 Breast Cancer Prediction App")
