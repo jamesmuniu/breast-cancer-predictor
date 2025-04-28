@@ -9,6 +9,9 @@ import seaborn as sns
 
 # Title and description
 st.title("🩺 Breast Cancer Prediction App")
+# Load and display the image with a specified width
+image = Image.open('Capture.JPG')
+st.image(image, caption='Breast Cancer Awareness', width=100)
 st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
 (""" Download the Dataset""")
 st.markdown(""" Download the dataset from the [UCI Machine Learning Repository(https://archive.ics.uci.edu/dataset/17)
