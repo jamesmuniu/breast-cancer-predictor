@@ -13,7 +13,7 @@ image = Image.open('Capture.JPG')
 # Resize the image to the desired width and height
 resized_image = image.resize((80, 60))  # (width, height)
 # Display the resized image
-st.image(resized_image, caption="Resized Image", use_column_width=False)
+st.image(resized_image, caption="Resized Image")
 # Title and description
 #st.title("🩺 Breast Cancer Prediction App")
 st.markdown("<h3 style='font-size: 20px;'>🔬🩺 Breast Cancer Prediction App </h3>", unsafe_allow_html=True)
