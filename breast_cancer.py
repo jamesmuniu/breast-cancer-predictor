@@ -11,7 +11,7 @@ st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide"
 st.title("🩺 Breast Cancer Prediction App")
 st.markdown("""
 Breast Cancer Prediction Challenge """)
-st.title("Step-by-Step Guide")
+st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
 (""" Download the Dataset
 
 Start by downloading the dataset from the UCI Machine Learning Repository . The dataset contains:
@@ -24,13 +24,13 @@ Save the modified dataset as a CSV file .
 Upload Your CSV File
 Use the upload feature to submit your prepared CSV file.
 Ensure the file contains only the 30 feature columns without the target column. """)
-st.title ("Run Predictions")
+st.markdown("<h3 style='font-size: 20px;'>Run Predictions.</h3>", unsafe_allow_html=True)
 (""" Once uploaded, the pre-trained machine learning model will process your data and generate predictions.
 The model will classify each tumor as either benign or malignant.""")
 st.markdown("<h3 style='font-size: 20px;'>Download Predictions.</h3>", unsafe_allow_html=True)
 (""" After the predictions are complete, download the updated CSV file.
 The downloaded file will include an additional column: Predictions , which contains the model's classification for each case.""")
-st.title("Compare Results")
+st.markdown("<h3 style='font-size: 20px;'>Compare Results.</h3>", unsafe_allow_html=True)
 ("""If you removed the target column earlier, you can now compare the Predictions column with the original diagnosis column to evaluate the model's accuracy.
 """)
 
