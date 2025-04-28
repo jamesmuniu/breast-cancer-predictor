@@ -28,7 +28,7 @@ If you're testing the accuracy of the model:
 Remove the target column (diagnosis) from your dataset before uploading. This column indicates whether each tumor is benign (0) or malignant (1).
 Save the modified dataset as a CSV file .
 Upload Your CSV File
-Use the upload feature on the left of the page 👈to submit your prepared CSV file.
+Use the upload feature on the left👈 of the page to submit your prepared CSV file.
 Ensure the file contains only the 30 feature columns without the target column. """)
 st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions.</h3>", unsafe_allow_html=True)
 (""" Once uploaded, the pre-trained machine learning model will process your data and generate predictions.
