@@ -14,7 +14,7 @@ Breast Cancer Prediction Challenge """)
 st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
 (""" Download the Dataset
 st.markdown("""
-Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17/breast%2Bcancer%2Bwisconsin%2Bdiagnostic).
+Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17/).
 """)
 Start by downloading the dataset from the UCI Machine Learning Repository . The dataset contains:
 569 cases : Each representing a unique patient record.
