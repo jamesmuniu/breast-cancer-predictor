@@ -10,9 +10,10 @@ st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide"
 # Title and description
 st.title("🩺 Breast Cancer Prediction App")
 st.markdown("""
-Breast Cancer Prediction Challenge""")
-st.title("Step-by-Step Guide") """)
-Download the Dataset
+Breast Cancer Prediction Challenge """)
+st.title("Step-by-Step Guide")
+(""" Download the Dataset
+
 Start by downloading the dataset from the UCI Machine Learning Repository . The dataset contains:
 569 cases : Each representing a unique patient record.
 30 FNA-derived features : These features describe characteristics of the tumor, such as radius, texture, perimeter, area, smoothness, and more.
