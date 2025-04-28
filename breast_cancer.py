@@ -3,12 +3,13 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import Image
 
 # Set page configuration
 #st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide")
 # Load and display the image with a specified width
 image = Image.open('Capture.JPG')
-st.image(image, caption='Breast Cancer Awareness', width=100)
+st.image(image, caption='Breast Cancer Awareness', width=150)
 # Title and description
 st.title("🩺 Breast Cancer Prediction App")
 st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allow_html=True)
