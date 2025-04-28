@@ -14,7 +14,7 @@ st.markdown("<h3 style='font-size: 20px;'>Step by Step Guide.</h3>", unsafe_allo
 st.markdown(""" Download the dataset from the [UCI Machine Learning Repository(https://archive.ics.uci.edu/dataset/17)
 """)
 ("""
-Start by downloading the dataset from the UCI Machine Learning Repository . The dataset contains:
+The dataset contains:
 569 cases : Each representing a unique patient record.
 30 FNA-derived features : These features describe characteristics of the tumor, such as radius, texture, perimeter, area, smoothness, and more.
 Prepare Your Data for Prediction
