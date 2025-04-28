@@ -106,4 +106,5 @@ from PIL import Image
 
 # Load and display the image with a specified width
 image = Image.open('Capture.JPG')
-st.image(image, caption='📢Breast Cancer Awareness', width=150)
+st.image(image, width=150)
+st.markdown("<h3 style='font-size: 20px;'>📢Breast Cancer Awareness.</h3>", unsafe_allow_html=True)
