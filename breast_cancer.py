@@ -100,7 +100,7 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"An error occurred: {e}")
 else:
-    st.info("Please upload or drop a CSV file on the left👈to begin and remember, early detection saves lives.")
+    st.info("Please upload or drop a CSV file on the left👈to begin (for mobile phones there is a window slider button '>' on the top-left of the screen and remember, early detection saves lives.")
 
 from PIL import Image
 
