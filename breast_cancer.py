@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-from PIL import Image 
+from PIL import Image
 
 # Set page configuration
 #st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide")
