@@ -109,30 +109,13 @@ image = Image.open('Capture.JPG')
 st.image(image, width=150)
 st.markdown("<h3 style='font-size: 20px;'>📢Breast Cancer Awareness.</h3>", unsafe_allow_html=True)
 
-# Visitor Hit Counter
-st.components.v1.html("""
-<script>
-    // Check if visitor count exists in localStorage
-    let visitorCount = localStorage.getItem('visitorCount');
-    if (!visitorCount) {
-        visitorCount = 0; // Initialize if not present
-    }
-    visitorCount = parseInt(visitorCount) + 1; // Increment count
-    localStorage.setItem('visitorCount', visitorCount); // Save updated count
-
-    // Display the counter at the bottom right of the page
-    const counterElement = document.createElement('div');
-    counterElement.style.position = 'fixed';
-    counterElement.style.bottom = '10px';
-    counterElement.style.right = '10px';
-    counterElement.style.backgroundColor = '#f0f0f0';
-    counterElement.style.padding = '5px 10px';
-    counterElement.style.borderRadius = '5px';
-    counterElement.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
-    counterElement.style.fontSize = '14px';
-    counterElement.style.fontFamily = 'Arial, sans-serif';
-    counterElement.innerText = `Visitors: ${visitorCount}`;
-    document.body.appendChild(counterElement);
-</script>
-""", height=10)
+# Visitor Counter using hits.sh
+counter_html = """
+<div style='position: fixed; bottom: 10px; left: 10px;'>
+    <a href='https://hits.sh/Hits/' target='_blank'>
+        <img alt='Hits' src='https://hits.sh/Hits.svg?style=flat-square&label=Visitors&color=008080&labelColor=202020'>
+    </a>
+</div>
+"""
+st.markdown(counter_html, unsafe_allow_html=True)
 
