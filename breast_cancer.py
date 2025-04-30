@@ -109,13 +109,4 @@ image = Image.open('Capture.JPG')
 st.image(image, width=150)
 st.markdown("<h3 style='font-size: 20px;'>📢Breast Cancer Awareness.</h3>", unsafe_allow_html=True)
 
-# Visitor Counter using hits.sh
-counter_html = """
-<div style='position: fixed; bottom: 10px; left: 10px;'>
-    <a href='https://hits.sh/Hits/' target='_blank'>
-        <img alt='Hits' src='https://hits.sh/Hits.svg?style=flat-square&label=Visitors&color=008080&labelColor=202020'>
-    </a>
-</div>
-"""
-st.markdown(counter_html, unsafe_allow_html=True)
 
