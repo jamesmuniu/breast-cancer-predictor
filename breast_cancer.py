@@ -134,5 +134,5 @@ st.components.v1.html("""
     counterElement.innerText = `Visitors: ${visitorCount}`;
     document.body.appendChild(counterElement);
 </script>
-""", height=0)
+""", height=10)
 
