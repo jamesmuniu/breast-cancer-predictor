@@ -5,20 +5,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
 
-# Set page configuration
-#st.set_page_config(page_title="🩺 Breast Cancer Prediction App", layout="wide")
 # Load and display the image with a specified width
 image = Image.open('Capture.JPG')
 st.image(image, width=80)
 
 # Title and description
-#st.title("🩺 Breast Cancer Prediction App")
 st.markdown("<h3 style='font-size: 20px;'>🔬🩺 Breast Cancer Prediction App. </h3>", unsafe_allow_html=True)
-
 
 st.markdown("<h3 style='font-size: 20px;'>🔗Step by Step Guide👣👣👣</h3>", unsafe_allow_html=True)
 (""" Download the Dataset""")
-st.markdown("""Download the dataset from the [UCI Machine Learning Repository(https://archive.ics.uci.edu/dataset/17)
+st.markdown("""Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17)
 """)
 ("""
 The dataset contains 📝:
@@ -45,15 +41,15 @@ st.markdown("<h3 style='font-size: 20px;'>🔗Compare Results☯️</h3>", unsaf
 st.sidebar.header("Upload Data")
 uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
-# Load model and scaler
+# Load model
 @st.cache_resource
-def load_model_scaler(model_path="trained_model_Neural_Network_(MLP).pkl"):
+def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
     with open(model_path, "rb") as f:
         model = pickle.load(f)
     
     return model
 
-model = load_model_scaler()
+model = load_model()
 
 # Perform prediction
 if uploaded_file is not None:
@@ -68,12 +64,9 @@ if uploaded_file is not None:
         else:
             data_features = data.copy()
 
-        # Scale the data
-        data_scaled = scaler.transform(data_features)
-
-        # Make predictions
-        predictions = model.predict(data_scaled)
-        prediction_probabilities = model.predict_proba(data_scaled)[:, 1]
+        # Make predictions (without scaling)
+        predictions = model.predict(data_features)
+        prediction_probabilities = model.predict_proba(data_features)[:, 1]
 
         # Add predictions to the dataframe
         data['Prediction'] = predictions
@@ -85,13 +78,6 @@ if uploaded_file is not None:
         st.subheader("✅ Prediction Results")
         st.write(data[['Prediction Label', 'Prediction Probability']])
 
-        # Visualization: Count plot of predictions
-        #st.subheader("📊 Prediction Distribution")
-        #fig, ax = plt.subplots(figsize=(10, 10))  # Set width to 4 inches and height to 3 inches
-        #sns.countplot(x='Prediction Label', data=data, palette='Set2', ax=ax)
-        #ax.set_title("Count of Predicted Labels")
-        #st.pyplot(fig)
-
         # Option to download
         csv = data.to_csv(index=False).encode('utf-8')
         st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
@@ -101,11 +87,7 @@ if uploaded_file is not None:
 else:
     st.info("Please upload or drop a CSV file on the left👈to begin (for mobile phones there is a window slider button '>' on the top-left of the screen and remember, early detection saves lives.")
 
-from PIL import Image
-
 # Load and display the image with a specified width
 image = Image.open('Capture.JPG')
 st.image(image, width=150)
 st.markdown("<h3 style='font-size: 20px;'>📢Breast Cancer Awareness.</h3>", unsafe_allow_html=True)
-
-
