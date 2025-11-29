@@ -45,14 +45,44 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 @st.cache_resource
 def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
     with open(model_path, "rb") as f:
-        model = pickle.load(f)
+        loaded_data = pickle.load(f)
+    
+    # Check if the loaded object is a dictionary and extract the model
+    if isinstance(loaded_data, dict):
+        st.sidebar.info("📁 Model file contains a dictionary. Looking for model...")
+        
+        # Try to find the model in the dictionary
+        model_keys = [key for key in loaded_data.keys() if 'model' in key.lower() or 'classifier' in key.lower() or 'mlp' in key.lower()]
+        
+        if model_keys:
+            model = loaded_data[model_keys[0]]
+            st.sidebar.success(f"✅ Model found with key: '{model_keys[0]}'")
+        else:
+            # If no obvious model key, try to use the first value that has predict method
+            for key, value in loaded_data.items():
+                if hasattr(value, 'predict'):
+                    model = value
+                    st.sidebar.success(f"✅ Model found with key: '{key}'")
+                    break
+            else:
+                # If no model found, show available keys and raise error
+                st.sidebar.error(f"❌ No model found in dictionary. Available keys: {list(loaded_data.keys())}")
+                raise ValueError("No model found in the dictionary")
+    else:
+        # If it's not a dictionary, assume it's the model directly
+        model = loaded_data
     
     return model
 
-model = load_model()
+try:
+    model = load_model()
+    st.sidebar.success("✅ Model loaded successfully!")
+except Exception as e:
+    st.sidebar.error(f"❌ Error loading model: {e}")
+    model = None
 
 # Perform prediction
-if uploaded_file is not None:
+if uploaded_file is not None and model is not None:
     try:
         data = pd.read_csv(uploaded_file)
         st.subheader("📄 Uploaded Data Preview")
@@ -65,25 +95,47 @@ if uploaded_file is not None:
             data_features = data.copy()
 
         # Make predictions (without scaling)
-        predictions = model.predict(data_features)
-        prediction_probabilities = model.predict_proba(data_features)[:, 1]
+        st.info("🔄 Making predictions...")
+        
+        # Check if model has predict method
+        if hasattr(model, 'predict'):
+            predictions = model.predict(data_features)
+            
+            # Check if model has predict_proba method
+            if hasattr(model, 'predict_proba'):
+                prediction_probabilities = model.predict_proba(data_features)[:, 1]
+            else:
+                # If no predict_proba, create dummy probabilities
+                prediction_probabilities = [0.5] * len(predictions)
+                st.warning("⚠️ Model doesn't support probability predictions. Using default values.")
+            
+            # Add predictions to the dataframe
+            data['Prediction'] = predictions
+            data['Prediction Probability'] = prediction_probabilities
 
-        # Add predictions to the dataframe
-        data['Prediction'] = predictions
-        data['Prediction Probability'] = prediction_probabilities
+            # Map predictions to labels
+            data['Prediction Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
 
-        # Map predictions to labels
-        data['Prediction Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
+            st.subheader("✅ Prediction Results")
+            st.write(data[['Prediction Label', 'Prediction Probability']].head())
 
-        st.subheader("✅ Prediction Results")
-        st.write(data[['Prediction Label', 'Prediction Probability']])
+            # Show prediction distribution
+            st.subheader("📊 Prediction Distribution")
+            pred_counts = data['Prediction Label'].value_counts()
+            st.write(pred_counts)
 
-        # Option to download
-        csv = data.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
+            # Option to download
+            csv = data.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
+            
+        else:
+            st.error("❌ The loaded object doesn't have a 'predict' method. Please check your model file.")
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
+        st.info("💡 Tip: Make sure your CSV file has the same features as the training data.")
+elif uploaded_file is not None and model is None:
+    st.error("❌ Cannot make predictions - model failed to load.")
 else:
     st.info("Please upload or drop a CSV file on the left👈to begin (for mobile phones there is a window slider button '>' on the top-left of the screen and remember, early detection saves lives.")
 
