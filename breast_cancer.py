@@ -64,10 +64,11 @@ def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
             st.sidebar.success(f"✅ Found scaler with key: '{scaler_keys[0]}'")
         
         # Check for feature names
-        feature_keys = [key for key in loaded_data.keys() if 'feature' in key.lower() or 'columns' in key.lower()]
+        feature_keys = [key for key in loaded_data.keys() if 'feature' in key.lower() or 'columns' in key.lower() or 'features' in key.lower()]
         if feature_keys:
             feature_names = loaded_data[feature_keys[0]]
             st.sidebar.success(f"✅ Found feature names with key: '{feature_keys[0]}'")
+            st.sidebar.info(f"📋 Model expects {len(feature_names)} features: {list(feature_names)}")
         
         return {
             'model': model,
@@ -85,12 +86,24 @@ def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
         # Check if it's a pipeline
         if hasattr(loaded_data, 'steps') or hasattr(loaded_data, 'named_steps'):
             st.sidebar.success("✅ Loaded object is a Pipeline")
+            # Try to extract feature names from pipeline
+            feature_names = None
+            try:
+                # For ColumnTransformer in pipeline
+                if hasattr(loaded_data, 'named_steps'):
+                    for step_name, step in loaded_data.named_steps.items():
+                        if hasattr(step, 'get_feature_names_out'):
+                            feature_names = step.get_feature_names_out()
+                            break
+            except:
+                pass
+                
             return {
                 'pipeline': loaded_data,
                 'model': None,
                 'scaler': None,
                 'preprocessor': None,
-                'feature_names': None,
+                'feature_names': feature_names,
                 'raw_data': loaded_data
             }
         # Check if it's a model with predict method
@@ -107,12 +120,19 @@ def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
         # Check if it's a preprocessor/scaler
         elif hasattr(loaded_data, 'transform'):
             st.sidebar.success("✅ Loaded object is a Preprocessor/Scaler")
+            # Try to get feature names from preprocessor
+            feature_names = None
+            try:
+                if hasattr(loaded_data, 'get_feature_names_out'):
+                    feature_names = loaded_data.get_feature_names_out()
+            except:
+                pass
             return {
                 'model': None,
                 'pipeline': None,
                 'scaler': loaded_data,
                 'preprocessor': loaded_data,
-                'feature_names': None,
+                'feature_names': feature_names,
                 'raw_data': loaded_data
             }
         else:
@@ -137,21 +157,46 @@ def detect_preprocessor_type(components):
     else:
         return 'none'
 
-try:
-    components = load_model()
-    preprocessor_type = detect_preprocessor_type(components)
-    st.sidebar.success(f"✅ Model loaded! Preprocessor type: {preprocessor_type}")
+def align_features_with_model(data_features, components, preprocessor_type):
+    """
+    Align the uploaded features with what the model expects
+    """
+    st.info("🔍 Aligning features with model expectations...")
     
-    # Show what we found
-    if components['pipeline']:
-        st.sidebar.info(f"🔧 Pipeline steps: {len(components['pipeline'].steps) if hasattr(components['pipeline'], 'steps') else 'Unknown'}")
-    if components['feature_names'] is not None:
-        st.sidebar.info(f"📋 Expected features: {len(components['feature_names'])}")
-        
-except Exception as e:
-    st.sidebar.error(f"❌ Error loading model: {e}")
-    components = None
-    preprocessor_type = 'none'
+    # Get expected features
+    expected_features = components['feature_names']
+    
+    if expected_features is None:
+        st.error("❌ Cannot align features - no feature names found in model")
+        st.info("💡 The model file should include the expected feature names")
+        return None
+    
+    st.write(f"📋 Model expects {len(expected_features)} features")
+    st.write(f"📊 Uploaded data has {len(data_features.columns)} features")
+    
+    # Find matching features
+    uploaded_features = set(data_features.columns)
+    expected_features_set = set(expected_features)
+    
+    # Find matches, missing, and extra features
+    matching_features = uploaded_features.intersection(expected_features_set)
+    missing_features = expected_features_set - uploaded_features
+    extra_features = uploaded_features - expected_features_set
+    
+    st.write(f"✅ Matching features: {len(matching_features)}")
+    
+    if missing_features:
+        st.error(f"❌ Missing features ({len(missing_features)}): {list(missing_features)}")
+        return None
+    
+    if extra_features:
+        st.warning(f"⚠️ Extra features ({len(extra_features)}) will be ignored: {list(extra_features)}")
+    
+    # Select only the expected features in the correct order
+    data_aligned = data_features[expected_features].copy()
+    
+    st.success(f"✅ Features aligned! Using {len(data_aligned.columns)} features")
+    return data_aligned
 
 def prepare_features_for_prediction(data_features, components, preprocessor_type):
     """
@@ -159,72 +204,56 @@ def prepare_features_for_prediction(data_features, components, preprocessor_type
     """
     st.info(f"🔧 Preparing features for {preprocessor_type} preprocessor...")
     
-    data_processed = data_features.copy()
+    # First align features with model expectations
+    data_aligned = align_features_with_model(data_features, components, preprocessor_type)
+    if data_aligned is None:
+        return None
     
     # Handle different preprocessor types
     if preprocessor_type == 'pipeline':
         st.write("🎯 Using full pipeline for preprocessing + prediction")
-        # Pipeline handles everything internally - just return raw features
-        # But we should validate feature names if available
-        if components['feature_names'] is not None:
-            expected_features = components['feature_names']
-            missing_features = set(expected_features) - set(data_processed.columns)
-            if missing_features:
-                st.error(f"❌ Missing features for pipeline: {list(missing_features)}")
-                return None
-            data_processed = data_processed[expected_features]
+        # Pipeline handles everything internally - just return aligned features
+        return data_aligned
         
     elif preprocessor_type == 'preprocessor':
         st.write("🔧 Applying standalone preprocessor")
         try:
-            data_processed = components['preprocessor'].transform(data_processed)
+            data_processed = components['preprocessor'].transform(data_aligned)
+            st.success("✅ Preprocessor transformation successful")
             # If it returns numpy array, convert back to DataFrame if possible
             if isinstance(data_processed, np.ndarray) and components['feature_names'] is not None:
                 data_processed = pd.DataFrame(data_processed, columns=components['feature_names'])
+            return data_processed
         except Exception as e:
             st.error(f"❌ Preprocessor transformation failed: {e}")
+            st.info("💡 This might be due to:")
+            st.write("- Feature type mismatches (categorical vs numeric)")
+            st.write("- Different data distributions")
+            st.write("- Preprocessor expecting different input format")
             return None
             
     elif preprocessor_type == 'scaler':
         st.write("🔧 Applying scaler")
         try:
-            # Validate features if feature names available
-            if components['feature_names'] is not None:
-                expected_features = components['feature_names']
-                missing_features = set(expected_features) - set(data_processed.columns)
-                if missing_features:
-                    st.error(f"❌ Missing features for scaler: {list(missing_features)}")
-                    return None
-                data_processed = data_processed[expected_features]
-            
-            data_processed = components['scaler'].transform(data_processed)
+            data_processed = components['scaler'].transform(data_aligned)
+            st.success("✅ Scaler transformation successful")
             if isinstance(data_processed, np.ndarray) and components['feature_names'] is not None:
                 data_processed = pd.DataFrame(data_processed, columns=components['feature_names'])
+            return data_processed
         except Exception as e:
             st.error(f"❌ Scaler transformation failed: {e}")
             return None
             
     else:  # no preprocessor
         st.write("🔧 No preprocessor - using raw features")
-        # Still validate feature names if available
-        if components['feature_names'] is not None:
-            expected_features = components['feature_names']
-            missing_features = set(expected_features) - set(data_processed.columns)
-            if missing_features:
-                st.error(f"❌ Missing features: {list(missing_features)}")
-                return None
-            data_processed = data_processed[expected_features]
-        
         # Convert all to numeric
-        for col in data_processed.columns:
-            if data_processed[col].dtype == 'object':
-                data_processed[col] = pd.to_numeric(data_processed[col], errors='coerce')
-                if data_processed[col].isna().any():
+        for col in data_aligned.columns:
+            if data_aligned[col].dtype == 'object':
+                data_aligned[col] = pd.to_numeric(data_aligned[col], errors='coerce')
+                if data_aligned[col].isna().any():
                     st.error(f"❌ Column '{col}' has non-convertible values")
                     return None
-    
-    st.success("✅ Feature preparation complete!")
-    return data_processed
+        return data_aligned
 
 def make_predictions(data_processed, components, preprocessor_type):
     """
@@ -232,6 +261,7 @@ def make_predictions(data_processed, components, preprocessor_type):
     """
     if preprocessor_type == 'pipeline':
         # Pipeline handles everything
+        st.write("🚀 Making predictions with pipeline...")
         predictions = components['pipeline'].predict(data_processed)
         if hasattr(components['pipeline'], 'predict_proba'):
             probabilities = components['pipeline'].predict_proba(data_processed)
@@ -244,6 +274,7 @@ def make_predictions(data_processed, components, preprocessor_type):
             
     elif components['model'] is not None:
         # Use standalone model
+        st.write("🚀 Making predictions with model...")
         predictions = components['model'].predict(data_processed)
         if hasattr(components['model'], 'predict_proba'):
             probabilities = components['model'].predict_proba(data_processed)
@@ -300,6 +331,14 @@ if uploaded_file is not None and components is not None:
             st.info(f"🗑️ Removed target column(s): {found_targets}")
         else:
             data_features = data.copy()
+            st.info("📋 Using all columns as features")
+        
+        # Show feature comparison
+        st.subheader("🔍 Feature Comparison")
+        if components['feature_names'] is not None:
+            st.write(f"Model expects: {len(components['feature_names'])} features")
+            st.write(f"Uploaded data has: {len(data_features.columns)} features")
+            st.write("This difference might cause the preprocessor error!")
         
         # Prepare features based on preprocessor type
         st.subheader("🔧 Feature Preparation")
@@ -307,9 +346,14 @@ if uploaded_file is not None and components is not None:
         
         if data_processed is None:
             st.error("❌ Feature preparation failed")
+            st.info("💡 Possible solutions:")
+            st.write("1. Ensure your CSV has the same features as the training data")
+            st.write("2. Check that feature names match exactly (case-sensitive)")
+            st.write("3. Verify no extra columns are present")
+            st.write("4. Make sure all required features are present")
             st.stop()
         
-        st.success(f"✅ Features prepared! Shape: {data_processed.shape}")
+        st.success(f"✅ Features prepared! Final shape: {data_processed.shape}")
         
         # Make predictions
         st.subheader("🎯 Making Predictions")
@@ -335,6 +379,11 @@ if uploaded_file is not None and components is not None:
             st.subheader("📊 Prediction Distribution")
             pred_counts = data['Prediction_Label'].value_counts()
             st.write(pred_counts)
+            
+            # Show confidence statistics
+            st.subheader("📈 Confidence Statistics")
+            st.write(f"Average confidence: {data['Prediction_Probability'].mean():.3f}")
+            st.write(f"Confidence range: {data['Prediction_Probability'].min():.3f} - {data['Prediction_Probability'].max():.3f}")
             
             # Download option
             csv = data.to_csv(index=False)
