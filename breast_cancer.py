@@ -181,8 +181,8 @@ def align_features_with_model(data_features, _components, _preprocessor_type):
         st.info("💡 The model file should include the expected feature names")
         return None
     
-    st.write(f"📋 Model expects {len(expected_features)} features")
-    st.write(f"📊 Uploaded data has {len(data_features.columns)} features")
+    st.write(f"📋 Model expects {len(expected_features)} features: {list(expected_features)}")
+    st.write(f"📊 Uploaded data has {len(data_features.columns)} features: {list(data_features.columns)}")
     
     # Find matching features
     uploaded_features = set(data_features.columns)
@@ -230,10 +230,20 @@ def prepare_features_for_prediction(data_features, _components, _preprocessor_ty
         try:
             data_processed = _components['preprocessor'].transform(data_aligned)
             st.success("✅ Preprocessor transformation successful")
-            # If it returns numpy array, convert back to DataFrame if possible
-            if isinstance(data_processed, np.ndarray) and _components['feature_names'] is not None:
-                data_processed = pd.DataFrame(data_processed, columns=_components['feature_names'])
-            return data_processed
+            
+            # Don't try to convert back to DataFrame - keep as numpy array
+            # The preprocessor output might have different feature names/numbers
+            # due to one-hot encoding, feature selection, etc.
+            st.write(f"📊 Preprocessor output shape: {data_processed.shape}")
+            
+            # If it's already a DataFrame, keep it as is
+            if isinstance(data_processed, pd.DataFrame):
+                return data_processed
+            else:
+                # For numpy arrays, we don't need column names for prediction
+                # The model will work with the numpy array directly
+                return data_processed
+                
         except Exception as e:
             st.error(f"❌ Preprocessor transformation failed: {e}")
             return None
@@ -243,9 +253,13 @@ def prepare_features_for_prediction(data_features, _components, _preprocessor_ty
         try:
             data_processed = _components['scaler'].transform(data_aligned)
             st.success("✅ Scaler transformation successful")
-            if isinstance(data_processed, np.ndarray) and _components['feature_names'] is not None:
-                data_processed = pd.DataFrame(data_processed, columns=_components['feature_names'])
-            return data_processed
+            st.write(f"📊 Scaler output shape: {data_processed.shape}")
+            
+            if isinstance(data_processed, pd.DataFrame):
+                return data_processed
+            else:
+                return data_processed
+                
         except Exception as e:
             st.error(f"❌ Scaler transformation failed: {e}")
             return None
@@ -265,6 +279,8 @@ def make_predictions(data_processed, _components, _preprocessor_type):
     """
     Make predictions based on the available components
     """
+    st.write(f"📊 Making predictions on data with shape: {data_processed.shape}")
+    
     if _preprocessor_type == 'pipeline':
         # Pipeline handles everything
         st.write("🚀 Making predictions with pipeline...")
@@ -294,6 +310,7 @@ def make_predictions(data_processed, _components, _preprocessor_type):
         st.error("❌ No model found for predictions")
         return None, None
         
+    st.success(f"✅ Predictions completed! Generated {len(predictions)} predictions")
     return predictions, probabilities
 
 def check_data_quality(data):
