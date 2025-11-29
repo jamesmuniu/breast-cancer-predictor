@@ -47,7 +47,7 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
 # Load model and scaler
 @st.cache_resource
-def load_model_scaler(model_path="model.pkl", scaler_path="scaler.pkl"):
+def load_model_scaler(model_path="trained_model_Neural_Network_(MLP).pkl""):
     with open(model_path, "rb") as f:
         model = pickle.load(f)
     with open(scaler_path, "rb") as f:
