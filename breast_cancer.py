@@ -14,29 +14,7 @@ st.image(image, width=80)
 st.markdown("<h3 style='font-size: 20px;'>🔬🩺 Breast Cancer Prediction App. </h3>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='font-size: 20px;'>🔗Step by Step Guide👣👣👣</h3>", unsafe_allow_html=True)
-(""" Download the Dataset""")
-st.markdown("""Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17)
-""")
-("""
-The dataset contains 📝:
-569 cases : Each representing a unique patient record🗃️.
-30 FNA-derived features : These features describe characteristics of the tumor, such as radius, texture, perimeter, area, smoothness, and more.
-Prepare Your Data for Prediction
-If you're testing the accuracy of the model:
-Remove the target column (diagnosis) from your dataset before uploading. This column indicates whether each tumor is benign (0) or malignant (1).
-Save the modified dataset as a CSV file .
- Upload Your CSV File
-Use the upload feature on the left👈of the page to submit your prepared CSV file.
-Ensure the file contains only the 30 feature columns without the target column. """)
-st.markdown("<h3 style='font-size: 20px;'>🔗Run Predictions⚙️</h3>", unsafe_allow_html=True)
-(""" Once uploaded, the pre-trained machine learning model will process your data and generate predictions.
-The model will classify each tumor as either benign or malignant.""")
-st.markdown("<h3 style='font-size: 20px;'>🔗Download Predictions⏬</h3>", unsafe_allow_html=True)
-(""" After the predictions are complete, download the updated CSV file.
-The downloaded file will include an additional column: Predictions , which contains the model's classification for each case.""")
-st.markdown("<h3 style='font-size: 20px;'>🔗Compare Results☯️</h3>", unsafe_allow_html=True)
-("""If you removed the target column earlier, you can now compare the Predictions column with the original diagnosis column to evaluate the model's accuracy.
-""")
+st.markdown("""Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17)""")
 
 # Sidebar for file upload
 st.sidebar.header("Upload Data")
@@ -85,93 +63,87 @@ except Exception as e:
 def preprocess_data(data):
     """
     Preprocess the data by converting categorical strings to numerical values
-    and ensuring all data is in the correct format for the model.
     """
     data_processed = data.copy()
-    
-    # Track which columns we converted
     converted_columns = {}
     
-    # Get the list of columns to process (make a copy to avoid modifying during iteration)
-    columns_to_process = list(data_processed.columns)
+    # First, identify all categorical columns
+    categorical_columns = []
+    for col in data_processed.columns:
+        # Safely check if this is a categorical column
+        try:
+            if data_processed[col].dtype == 'object':
+                categorical_columns.append(col)
+        except AttributeError:
+            # If we can't check dtype, assume it's not categorical
+            continue
     
-    for column in columns_to_process:
-        # Skip if column was already processed (e.g., removed during one-hot encoding)
-        if column not in data_processed.columns:
+    st.info(f"🔧 Found {len(categorical_columns)} categorical columns: {categorical_columns}")
+    
+    # Process each categorical column
+    for col in categorical_columns:
+        if col not in data_processed.columns:
             continue
             
-        # Safely get the column data
-        col_data = data_processed[column]
+        st.write(f"Processing column: '{col}'")
         
-        # Check if the column contains string data or mixed types
-        if col_data.dtype == 'object' or (hasattr(col_data, 'dtype') and col_data.dtype == 'object'):
-            st.info(f"🔧 Converting categorical column: '{column}'")
-            
-            # Get unique values to show what we're converting
-            unique_vals = col_data.unique()
-            st.write(f"   Unique values in '{column}': {list(unique_vals)}")
-            
-            # Convert categorical data to numerical
-            # For binary categorical data (like Male/Female, Yes/No)
-            if len(unique_vals) == 2:
-                # Create mapping for binary categories
-                mapping = {val: i for i, val in enumerate(unique_vals)}
-                data_processed[column] = data_processed[column].map(mapping)
-                converted_columns[column] = {'type': 'binary', 'mapping': mapping}
-                st.write(f"   Binary mapping: {mapping}")
-            
-            # For multi-category data
-            elif len(unique_vals) > 2:
-                # Use one-hot encoding for multiple categories
-                dummies = pd.get_dummies(data_processed[column], prefix=column)
-                # Remove the original column
-                data_processed = data_processed.drop(columns=[column])
-                # Add the new dummy columns
-                data_processed = pd.concat([data_processed, dummies], axis=1)
-                converted_columns[column] = {'type': 'one-hot', 'categories': list(unique_vals)}
-                st.write(f"   One-hot encoded into {len(unique_vals)} columns")
-            
-            else:
-                # Only one unique value - can be converted to 0 or dropped
-                data_processed[column] = 0
-                converted_columns[column] = {'type': 'constant', 'value': 0}
-                st.write(f"   Constant value column, set to 0")
+        # Get the actual series for this column
+        col_series = data_processed[col]
         
-        # Also handle numeric columns that might have been read as strings
-        elif col_data.dtype == 'object':
-            try:
-                # Try to convert to numeric
-                data_processed[column] = pd.to_numeric(data_processed[column], errors='coerce')
-                # Check if we have any NaN values after conversion
-                if data_processed[column].isna().any():
-                    st.warning(f"⚠️ Column '{column}' has non-numeric values that couldn't be converted")
+        # Get unique values
+        unique_vals = col_series.unique()
+        st.write(f"   Unique values: {list(unique_vals)}")
+        
+        # Handle based on number of unique values
+        if len(unique_vals) == 2:
+            # Binary encoding
+            mapping = {val: i for i, val in enumerate(unique_vals)}
+            data_processed[col] = data_processed[col].map(mapping)
+            converted_columns[col] = {'type': 'binary', 'mapping': mapping}
+            st.write(f"   Binary mapping: {mapping}")
+            
+        elif len(unique_vals) > 2:
+            # One-hot encoding
+            dummies = pd.get_dummies(data_processed[col], prefix=col)
+            data_processed = pd.concat([data_processed.drop(columns=[col]), dummies], axis=1)
+            converted_columns[col] = {'type': 'one-hot', 'categories': list(unique_vals)}
+            st.write(f"   One-hot encoded into {len(unique_vals)} columns")
+            
+        else:
+            # Single value - convert to constant
+            data_processed[col] = 0
+            converted_columns[col] = {'type': 'constant', 'value': 0}
+            st.write(f"   Constant value: 0")
+    
+    # Now handle any string columns that might have been missed
+    for col in data_processed.columns:
+        try:
+            # Try to convert any remaining object columns to numeric
+            if data_processed[col].dtype == 'object':
+                original_dtype = data_processed[col].dtype
+                data_processed[col] = pd.to_numeric(data_processed[col], errors='coerce')
+                if data_processed[col].isna().any():
+                    st.warning(f"⚠️ Column '{col}' has non-convertible values")
                 else:
-                    st.info(f"🔧 Converted column '{column}' from string to numeric")
-                    converted_columns[column] = {'type': 'string_to_numeric'}
-            except:
-                st.warning(f"⚠️ Could not convert column '{column}' to numeric, keeping as is")
+                    st.info(f"🔧 Converted '{col}' from {original_dtype} to numeric")
+                    converted_columns[col] = {'type': 'auto_numeric'}
+        except:
+            continue
     
     return data_processed, converted_columns
 
 def check_data_quality(data):
     """
-    Check for potential data quality issues and provide warnings
+    Check for potential data quality issues
     """
     warnings = []
     
     # Check for missing values
-    missing_values = data.isnull().sum().sum()
-    if missing_values > 0:
-        warnings.append(f"⚠️ Found {missing_values} missing values in the data")
+    missing_count = data.isnull().sum().sum()
+    if missing_count > 0:
+        warnings.append(f"⚠️ Found {missing_count} missing values")
     
-    # Check for infinite values in numeric columns
-    numeric_data = data.select_dtypes(include=[np.number])
-    if not numeric_data.empty:
-        infinite_values = np.isinf(numeric_data).sum().sum()
-        if infinite_values > 0:
-            warnings.append(f"⚠️ Found {infinite_values} infinite values in the data")
-    
-    # Check for columns with all same values
+    # Check for constant columns
     for col in data.columns:
         if data[col].nunique() == 1:
             warnings.append(f"⚠️ Column '{col}' has only one unique value")
@@ -181,120 +153,113 @@ def check_data_quality(data):
 # Perform prediction
 if uploaded_file is not None and model is not None:
     try:
+        # Read the data
         data = pd.read_csv(uploaded_file)
         st.subheader("📄 Uploaded Data Preview")
-        st.write("Original data shape:", data.shape)
+        st.write(f"Data shape: {data.shape}")
         st.write(data.head())
-
-        # Show data types
-        st.subheader("📊 Data Types Information")
-        dtype_info = pd.DataFrame({
-            'Column': data.columns,
-            'Data Type': data.dtypes,
-            'Non-Null Count': data.count(),
-            'Null Count': data.isnull().sum()
-        })
-        st.write(dtype_info)
-
-        # Check for data quality issues
-        data_warnings = check_data_quality(data)
-        if data_warnings:
-            st.warning("Data Quality Warnings:")
-            for warning in data_warnings:
-                st.write(warning)
-
-        # Drop unwanted columns if present
+        
+        # Show data info
+        st.subheader("📊 Data Information")
+        st.write("Data types:")
+        st.write(data.dtypes)
+        
+        # Check data quality
+        warnings = check_data_quality(data)
+        if warnings:
+            st.warning("Data Quality Issues:")
+            for warning in warnings:
+                st.write(f"• {warning}")
+        
+        # Prepare features
         if "diagnosis" in data.columns:
             data_features = data.drop(columns=["diagnosis"])
-            st.info("🗑️ 'diagnosis' column removed for prediction")
+            st.info("🗑️ Removed 'diagnosis' column for prediction")
         else:
             data_features = data.copy()
-
-        # Preprocess the data
+        
+        # Preprocess data
         st.subheader("🔧 Data Preprocessing")
         data_processed, conversion_info = preprocess_data(data_features)
         
-        st.success("✅ Data preprocessing completed!")
-        st.write("Processed data shape:", data_processed.shape)
+        st.success(f"✅ Preprocessing complete! Final shape: {data_processed.shape}")
         st.write("Processed data preview:")
         st.write(data_processed.head())
-        
-        # Show processed data types
         st.write("Processed data types:")
         st.write(data_processed.dtypes)
-
-        # Make predictions
-        st.info("🔄 Making predictions...")
         
-        # Check if model has predict method
+        # Make predictions
+        st.subheader("🎯 Making Predictions")
+        
         if hasattr(model, 'predict'):
+            # Ensure all data is numeric
+            for col in data_processed.columns:
+                if data_processed[col].dtype == 'object':
+                    st.error(f"❌ Column '{col}' is still non-numeric after preprocessing")
+                    return
+            
+            # Make predictions
             predictions = model.predict(data_processed)
             
-            # Check if model has predict_proba method
+            # Get probabilities if available
             if hasattr(model, 'predict_proba'):
-                prediction_probabilities = model.predict_proba(data_processed)[:, 1]
+                probabilities = model.predict_proba(data_processed)[:, 1]
             else:
-                # If no predict_proba, create dummy probabilities
-                prediction_probabilities = [0.5] * len(predictions)
-                st.warning("⚠️ Model doesn't support probability predictions. Using default values.")
+                probabilities = [0.5] * len(predictions)
+                st.warning("⚠️ Using default probabilities (0.5)")
             
-            # Add predictions to the original dataframe
+            # Add results to original data
             data['Prediction'] = predictions
-            data['Prediction Probability'] = prediction_probabilities
-
-            # Map predictions to labels
-            data['Prediction Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
-
+            data['Prediction_Probability'] = probabilities
+            data['Prediction_Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
+            
+            # Show results
             st.subheader("✅ Prediction Results")
-            st.write(data[['Prediction Label', 'Prediction Probability']].head())
-
-            # Show prediction distribution
+            st.write(data[['Prediction_Label', 'Prediction_Probability']].head())
+            
+            # Show distribution
             st.subheader("📊 Prediction Distribution")
-            pred_counts = data['Prediction Label'].value_counts()
+            pred_counts = data['Prediction_Label'].value_counts()
             st.write(pred_counts)
-
+            
             # Show conversion summary
             if conversion_info:
-                st.subheader("🔧 Data Conversion Summary")
+                st.subheader("🔧 Conversion Summary")
                 for col, info in conversion_info.items():
                     if info['type'] == 'binary':
-                        st.write(f"• '{col}': Binary mapping {info['mapping']}")
+                        st.write(f"• **{col}**: Binary encoding {info['mapping']}")
                     elif info['type'] == 'one-hot':
-                        st.write(f"• '{col}': One-hot encoded into {len(info['categories'])} categories")
+                        st.write(f"• **{col}**: One-hot encoded into {len(info['categories'])} columns")
                     elif info['type'] == 'constant':
-                        st.write(f"• '{col}': Constant value set to {info['value']}")
-                    elif info['type'] == 'string_to_numeric':
-                        st.write(f"• '{col}': Converted from string to numeric")
-
-            # Option to download
-            csv = data.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
+                        st.write(f"• **{col}**: Constant value {info['value']}")
+                    elif info['type'] == 'auto_numeric':
+                        st.write(f"• **{col}**: Auto-converted to numeric")
+            
+            # Download option
+            csv = data.to_csv(index=False)
+            st.download_button(
+                "📥 Download Predictions",
+                csv,
+                "breast_cancer_predictions.csv",
+                "text/csv"
+            )
             
         else:
-            st.error("❌ The loaded object doesn't have a 'predict' method. Please check your model file.")
-
+            st.error("❌ Model doesn't have predict method")
+            
     except Exception as e:
-        st.error(f"An error occurred: {e}")
-        st.info("💡 Tip: Make sure your CSV file has the correct format and compatible features.")
-        # Show more detailed error information for debugging
-        st.write("Debug info - please check:")
-        st.write("1. Ensure all non-target columns are present")
-        st.write("2. Check for mixed data types in columns")
-        st.write("3. Verify there are no special characters in the data")
+        st.error(f"❌ An error occurred: {str(e)}")
+        st.info("💡 Debugging tips:")
+        st.write("1. Check that your CSV has the expected columns")
+        st.write("2. Ensure all data is numeric or convertible to numeric")
+        st.write("3. Verify the model expects the same features as your data")
         
-        # If there's still an error, show the data that's causing issues
-        try:
-            st.write("Data types after preprocessing:")
-            if 'data_processed' in locals():
-                st.write(data_processed.dtypes)
-        except:
-            pass
 elif uploaded_file is not None and model is None:
-    st.error("❌ Cannot make predictions - model failed to load.")
+    st.error("❌ Model not loaded properly")
 else:
-    st.info("Please upload or drop a CSV file on the left👈to begin (for mobile phones there is a window slider button '>' on the top-left of the screen and remember, early detection saves lives.")
+    st.info("👈 Please upload a CSV file to get started")
 
-# Load and display the image with a specified width
+# Footer
 image = Image.open('Capture.JPG')
 st.image(image, width=150)
-st.markdown("<h3 style='font-size: 20px;'>📢Breast Cancer Awareness.</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>📢 Breast Cancer Awareness</h3>", unsafe_allow_html=True)
