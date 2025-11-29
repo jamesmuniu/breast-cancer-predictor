@@ -192,57 +192,61 @@ if uploaded_file is not None and model is not None:
         st.subheader("🎯 Making Predictions")
         
         if hasattr(model, 'predict'):
-            # Ensure all data is numeric
+            # Check for any remaining non-numeric columns
+            non_numeric_cols = []
             for col in data_processed.columns:
                 if data_processed[col].dtype == 'object':
-                    st.error(f"❌ Column '{col}' is still non-numeric after preprocessing")
-                    return
+                    non_numeric_cols.append(col)
             
-            # Make predictions
-            predictions = model.predict(data_processed)
-            
-            # Get probabilities if available
-            if hasattr(model, 'predict_proba'):
-                probabilities = model.predict_proba(data_processed)[:, 1]
+            if non_numeric_cols:
+                st.error(f"❌ The following columns are still non-numeric and cannot be processed: {non_numeric_cols}")
+                st.stop()  # Use st.stop() instead of return
             else:
-                probabilities = [0.5] * len(predictions)
-                st.warning("⚠️ Using default probabilities (0.5)")
-            
-            # Add results to original data
-            data['Prediction'] = predictions
-            data['Prediction_Probability'] = probabilities
-            data['Prediction_Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
-            
-            # Show results
-            st.subheader("✅ Prediction Results")
-            st.write(data[['Prediction_Label', 'Prediction_Probability']].head())
-            
-            # Show distribution
-            st.subheader("📊 Prediction Distribution")
-            pred_counts = data['Prediction_Label'].value_counts()
-            st.write(pred_counts)
-            
-            # Show conversion summary
-            if conversion_info:
-                st.subheader("🔧 Conversion Summary")
-                for col, info in conversion_info.items():
-                    if info['type'] == 'binary':
-                        st.write(f"• **{col}**: Binary encoding {info['mapping']}")
-                    elif info['type'] == 'one-hot':
-                        st.write(f"• **{col}**: One-hot encoded into {len(info['categories'])} columns")
-                    elif info['type'] == 'constant':
-                        st.write(f"• **{col}**: Constant value {info['value']}")
-                    elif info['type'] == 'auto_numeric':
-                        st.write(f"• **{col}**: Auto-converted to numeric")
-            
-            # Download option
-            csv = data.to_csv(index=False)
-            st.download_button(
-                "📥 Download Predictions",
-                csv,
-                "breast_cancer_predictions.csv",
-                "text/csv"
-            )
+                # Make predictions
+                predictions = model.predict(data_processed)
+                
+                # Get probabilities if available
+                if hasattr(model, 'predict_proba'):
+                    probabilities = model.predict_proba(data_processed)[:, 1]
+                else:
+                    probabilities = [0.5] * len(predictions)
+                    st.warning("⚠️ Using default probabilities (0.5)")
+                
+                # Add results to original data
+                data['Prediction'] = predictions
+                data['Prediction_Probability'] = probabilities
+                data['Prediction_Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
+                
+                # Show results
+                st.subheader("✅ Prediction Results")
+                st.write(data[['Prediction_Label', 'Prediction_Probability']].head())
+                
+                # Show distribution
+                st.subheader("📊 Prediction Distribution")
+                pred_counts = data['Prediction_Label'].value_counts()
+                st.write(pred_counts)
+                
+                # Show conversion summary
+                if conversion_info:
+                    st.subheader("🔧 Conversion Summary")
+                    for col, info in conversion_info.items():
+                        if info['type'] == 'binary':
+                            st.write(f"• **{col}**: Binary encoding {info['mapping']}")
+                        elif info['type'] == 'one-hot':
+                            st.write(f"• **{col}**: One-hot encoded into {len(info['categories'])} columns")
+                        elif info['type'] == 'constant':
+                            st.write(f"• **{col}**: Constant value {info['value']}")
+                        elif info['type'] == 'auto_numeric':
+                            st.write(f"• **{col}**: Auto-converted to numeric")
+                
+                # Download option
+                csv = data.to_csv(index=False)
+                st.download_button(
+                    "📥 Download Predictions",
+                    csv,
+                    "breast_cancer_predictions.csv",
+                    "text/csv"
+                )
             
         else:
             st.error("❌ Model doesn't have predict method")
