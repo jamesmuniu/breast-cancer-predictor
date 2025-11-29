@@ -50,11 +50,10 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 def load_model_scaler(model_path="trained_model_Neural_Network_(MLP).pkl""):
     with open(model_path, "rb") as f:
         model = pickle.load(f)
-    with open(scaler_path, "rb") as f:
-        scaler = pickle.load(f)
-    return model, scaler
+    
+    return model
 
-model, scaler = load_model_scaler()
+model = load_model_scaler()
 
 # Perform prediction
 if uploaded_file is not None:
