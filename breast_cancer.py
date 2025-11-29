@@ -92,13 +92,23 @@ def preprocess_data(data):
     # Track which columns we converted
     converted_columns = {}
     
-    for column in data_processed.columns:
-        # Check if the column contains string data
-        if data_processed[column].dtype == 'object':
+    # Get the list of columns to process (make a copy to avoid modifying during iteration)
+    columns_to_process = list(data_processed.columns)
+    
+    for column in columns_to_process:
+        # Skip if column was already processed (e.g., removed during one-hot encoding)
+        if column not in data_processed.columns:
+            continue
+            
+        # Safely get the column data
+        col_data = data_processed[column]
+        
+        # Check if the column contains string data or mixed types
+        if col_data.dtype == 'object' or (hasattr(col_data, 'dtype') and col_data.dtype == 'object'):
             st.info(f"🔧 Converting categorical column: '{column}'")
             
             # Get unique values to show what we're converting
-            unique_vals = data_processed[column].unique()
+            unique_vals = col_data.unique()
             st.write(f"   Unique values in '{column}': {list(unique_vals)}")
             
             # Convert categorical data to numerical
@@ -114,8 +124,10 @@ def preprocess_data(data):
             elif len(unique_vals) > 2:
                 # Use one-hot encoding for multiple categories
                 dummies = pd.get_dummies(data_processed[column], prefix=column)
-                data_processed = pd.concat([data_processed, dummies], axis=1)
+                # Remove the original column
                 data_processed = data_processed.drop(columns=[column])
+                # Add the new dummy columns
+                data_processed = pd.concat([data_processed, dummies], axis=1)
                 converted_columns[column] = {'type': 'one-hot', 'categories': list(unique_vals)}
                 st.write(f"   One-hot encoded into {len(unique_vals)} columns")
             
@@ -124,6 +136,20 @@ def preprocess_data(data):
                 data_processed[column] = 0
                 converted_columns[column] = {'type': 'constant', 'value': 0}
                 st.write(f"   Constant value column, set to 0")
+        
+        # Also handle numeric columns that might have been read as strings
+        elif col_data.dtype == 'object':
+            try:
+                # Try to convert to numeric
+                data_processed[column] = pd.to_numeric(data_processed[column], errors='coerce')
+                # Check if we have any NaN values after conversion
+                if data_processed[column].isna().any():
+                    st.warning(f"⚠️ Column '{column}' has non-numeric values that couldn't be converted")
+                else:
+                    st.info(f"🔧 Converted column '{column}' from string to numeric")
+                    converted_columns[column] = {'type': 'string_to_numeric'}
+            except:
+                st.warning(f"⚠️ Could not convert column '{column}' to numeric, keeping as is")
     
     return data_processed, converted_columns
 
@@ -138,9 +164,10 @@ def check_data_quality(data):
     if missing_values > 0:
         warnings.append(f"⚠️ Found {missing_values} missing values in the data")
     
-    # Check for infinite values
-    if data.select_dtypes(include=[np.number]).size > 0:
-        infinite_values = np.isinf(data.select_dtypes(include=[np.number])).sum().sum()
+    # Check for infinite values in numeric columns
+    numeric_data = data.select_dtypes(include=[np.number])
+    if not numeric_data.empty:
+        infinite_values = np.isinf(numeric_data).sum().sum()
         if infinite_values > 0:
             warnings.append(f"⚠️ Found {infinite_values} infinite values in the data")
     
@@ -161,7 +188,13 @@ if uploaded_file is not None and model is not None:
 
         # Show data types
         st.subheader("📊 Data Types Information")
-        st.write(data.dtypes)
+        dtype_info = pd.DataFrame({
+            'Column': data.columns,
+            'Data Type': data.dtypes,
+            'Non-Null Count': data.count(),
+            'Null Count': data.isnull().sum()
+        })
+        st.write(dtype_info)
 
         # Check for data quality issues
         data_warnings = check_data_quality(data)
@@ -185,6 +218,10 @@ if uploaded_file is not None and model is not None:
         st.write("Processed data shape:", data_processed.shape)
         st.write("Processed data preview:")
         st.write(data_processed.head())
+        
+        # Show processed data types
+        st.write("Processed data types:")
+        st.write(data_processed.dtypes)
 
         # Make predictions
         st.info("🔄 Making predictions...")
@@ -226,6 +263,8 @@ if uploaded_file is not None and model is not None:
                         st.write(f"• '{col}': One-hot encoded into {len(info['categories'])} categories")
                     elif info['type'] == 'constant':
                         st.write(f"• '{col}': Constant value set to {info['value']}")
+                    elif info['type'] == 'string_to_numeric':
+                        st.write(f"• '{col}': Converted from string to numeric")
 
             # Option to download
             csv = data.to_csv(index=False).encode('utf-8')
@@ -242,6 +281,14 @@ if uploaded_file is not None and model is not None:
         st.write("1. Ensure all non-target columns are present")
         st.write("2. Check for mixed data types in columns")
         st.write("3. Verify there are no special characters in the data")
+        
+        # If there's still an error, show the data that's causing issues
+        try:
+            st.write("Data types after preprocessing:")
+            if 'data_processed' in locals():
+                st.write(data_processed.dtypes)
+        except:
+            pass
 elif uploaded_file is not None and model is None:
     st.error("❌ Cannot make predictions - model failed to load.")
 else:
