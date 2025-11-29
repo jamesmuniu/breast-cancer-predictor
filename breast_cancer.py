@@ -15,10 +15,10 @@ image = Image.open('Capture.JPG')
 st.image(image, width=80)
 
 # Title and description
-st.markdown("<h3 style='font-size: 20px;'>🔬🩺 Breast Cancer Prediction App. </h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>Airline Customer Satisfaction Predictor App. </h3>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='font-size: 20px;'>🔗Step by Step Guide👣👣👣</h3>", unsafe_allow_html=True)
-st.markdown("""Download the dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17)""")
+st.markdown("""Download the dataset""")
 
 # Sidebar for file upload
 st.sidebar.header("Upload Data")
@@ -438,6 +438,6 @@ else:
     st.info("👈 Please upload a CSV file to get started")
 
 # Footer
-image = Image.open('Capture.JPG')
-st.image(image, width=150)
-st.markdown("<h3 style='font-size: 20px;'>📢 Breast Cancer Awareness</h3>", unsafe_allow_html=True)
+#image = Image.open('Capture.JPG')
+#st.image(image, width=150)
+#st.markdown("<h3 style='font-size: 20px;'>📢 Breast Cancer Awareness</h3>", unsafe_allow_html=True)
