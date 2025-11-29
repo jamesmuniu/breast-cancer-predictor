@@ -215,7 +215,7 @@ if uploaded_file is not None and model is not None:
                 # Add results to original data
                 data['Prediction'] = predictions
                 data['Prediction_Probability'] = probabilities
-                data['Prediction_Label'] = data['Prediction'].map({0: 'Benign', 1: 'Malignant'})
+                data['Prediction_Label'] = data['Prediction'].map({0: 'neutral or dissatisfied', 1: 'satisfied'})
                 
                 # Show results
                 st.subheader("✅ Prediction Results")
