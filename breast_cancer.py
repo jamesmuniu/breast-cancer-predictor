@@ -11,8 +11,8 @@ components = None
 preprocessor_type = 'none'
 
 # Load and display the image with a specified width
-image = Image.open('Capture.JPG')
-st.image(image, width=80)
+#image = Image.open('Capture.JPG')
+#st.image(image, width=80)
 
 # Title and description
 st.markdown("<h3 style='font-size: 20px;'>Airline Customer Satisfaction Predictor App. </h3>", unsafe_allow_html=True)
