@@ -417,18 +417,25 @@ if uploaded_file is not None:
                 st.write(pred_counts)
                 
                 # Show confidence statistics
-                st.subheader("📈 Confidence Statistics")
-                st.write(f"Average confidence: {data['Prediction_Probability'].mean():.3f}")
-                st.write(f"Confidence range: {data['Prediction_Probability'].min():.3f} - {data['Prediction_Probability'].max():.3f}")
-                
-                # Download option
-                csv = data.to_csv(index=False)
-                st.download_button(
-                    "📥 Download Predictions",
-                    csv,
-                    "predictions.csv",
-                    "text/csv"
-                )
+                def predict_satisfaction_with_confidence(sample_data):
+    """
+    Predict satisfaction for new sample data with explicit confidence scores
+    """
+    prediction = rf_model.predict(sample_data)[0]
+    probabilities = rf_model.predict_proba(sample_data)[0]
+    confidence_dict = dict(zip(rf_model.classes_, probabilities))
+    
+    # Get the confidence score for the predicted class
+    confidence_score = confidence_dict[prediction]
+    
+    return prediction, confidence_score, confidence_dict
+
+# Example usage:
+prediction, confidence, all_probabilities = predict_satisfaction_with_confidence(sample_data)
+
+print(f"Prediction: {prediction}")
+print(f"Confidence Score: {confidence:.2%}")
+print(f"All Probabilities: {all_probabilities}")
                 
         except Exception as e:
             st.error(f"❌ An error occurred: {str(e)}")
