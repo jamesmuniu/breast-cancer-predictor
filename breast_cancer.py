@@ -26,7 +26,7 @@ uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
 # Load model and detect preprocessor type
 @st.cache_resource
-def load_model(model_path="trained_model_Neural_Network_(MLP).pkl"):
+def load_model(model_path="loan-approval_model_Neural_Network_(MLP) (1).pkl"):
     try:
         with open(model_path, "rb") as f:
             loaded_data = pickle.load(f)
