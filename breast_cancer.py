@@ -15,7 +15,7 @@ preprocessor_type = 'none'
 #st.image(image, width=80)
 
 # Title and description
-st.markdown("<h3 style='font-size: 20px;'>Airline Customer Satisfaction Predictor App. </h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 20px;'>InsightNav AI ML Model Tester. </h3>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='font-size: 20px;'>🔗Step by Step Guide👣👣👣</h3>", unsafe_allow_html=True)
 st.markdown("""Download the dataset""")
