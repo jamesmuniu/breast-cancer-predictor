@@ -403,7 +403,7 @@ if uploaded_file is not None:
                 # Map predictions to labels
                 unique_preds = np.unique(predictions)
                 if len(unique_preds) == 2 and set(unique_preds) == {0, 1}:
-                    data['Prediction_Label'] = data['Prediction'].map({0: 'neutral or dissatisfied', 1: 'satisfied'})
+                    data['Prediction_Label'] = data['Prediction'].map({0: 'Not_Approved', 1: 'Approved'})
                 else:
                     data['Prediction_Label'] = data['Prediction']
                 
